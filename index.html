@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tarea 3 visualización</title>
+  </head>
+  <body>
+    <div id="card" >
+      <div id="container"></div>
+
+      <svg class="demo" id="demo" width="2000" height="2000"></svg>
+      <script type="module">
+          import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm" 
+          var xScale = d3.scaleLinear().domain([-66.419422, -125.786406]).range([350*4, 20]);
+          var yScale = d3.scaleLinear().domain([23.982057,50.508481]).range([200*4, 50]);
+          async function prepareCoord(){
+              try {
+                  const response = await fetch('states_usa.bna', {
+                  headers: {
+                  'Content-Type': 'text/csv', 
+                  },
+                  });
+              if (response.ok) {
+                  const csvContent = await response.text();
+                  var arrayCoord = csvContent.split('\n'); 
+                  var newCoord = [];
+                  var posc = 0;
+                  var areaAll = [];
+                  var listCoord = [];
+                  arrayCoord.forEach(elem => { 
+                      elem =elem.split(',');
+                      if(elem.length == 3){
+                          newCoord = newCoord.concat({id:elem[0],idUser:elem[1],
+                                                       numState:elem[2], coord:[]});
+                          if(listCoord.length != 0){
+                              areaAll = areaAll.concat([listCoord]); //[{x:,y:},...,{x:,y:}]
+                          }
+                          posc ++;
+                          listCoord=[];
+                      }else{
+                          newCoord[posc-1].coord = {x:elem[0],y:elem[1]};
+                          listCoord = listCoord.concat({x:elem[0], y:elem[1]});
+                      }
+                  });
+              }else{
+                  console.error('Error al descargar el archivo:', response.status);
+              }
+  
+              return [newCoord,areaAll];
+              } catch (error) {
+                  console.error('Error en la solicitud:', error);
+              }
+          }
+          let prepareCoordRes = await prepareCoord();
+          let coord = prepareCoordRes[0]
+          let areaAll = prepareCoordRes[1]
+          console.log(areaAll)
+          var area = d3.area()
+                      .x(d => xScale(d.x))
+                      .y0(d => yScale(d.y))
+                      .y1(d => yScale(d.y));
+          const colorScale = d3.scaleLinear()
+              .domain([0, 1])
+              .range(['#FFFF00', '#00AABB']); 
+  
+  
+          let randomColor;
+          let c = d3.color("steelblue");
+          areaAll.forEach(element => {
+              randomColor = colorScale(Math.random());
+              d3.select("#demo")
+              .append("path")
+              .attr("d", area(element))
+              .attr("fill", "red")
+              .attr("stroke", randomColor); 
+          });
+          
+      </script>
+      <svg id="usaStates"></svg>
+      <svg id="radialM" width=4000 height=2000>
+        <g transform="translate(600,600)">
+          <g class="rects"></g>
+          <g class="links"></g>
+          <g class="nodes"></g>
+        </g>
+      </svg>
+
+      <svg id="treemapM" width=1440 height=1000></svg>
+    
+      <svg id="circleM" width=700 height=700 transform="rotate(-90), translate(-200,0)">
+        <g  transform="translate(5,5)"></g>
+      </svg>
+    <svg id="partitionM" width=1000 height=1000 transform="rotate(-90), translate(-500,0)">
+      <g transform="rotate(-90), translate(-220,10)">
+        <g class="rects"></g>
+        <g class="links"></g>
+        <g class="nodes"></g>
+      </g>
+    </svg>
+
+      <svg id="radialF" width=4000 height=2000>
+        <g transform="translate(600,600)">
+          <g class="rects"></g>
+          <g class="links"></g>
+          <g class="nodes"></g>
+        </g>
+      </svg>
+      <svg id="treemapF" width=1440 height=1000></svg>
+    
+      <svg id="circleF" width=700 height=700 transform="rotate(-90), translate(-200,0)">
+        <g  transform="translate(5,5)"></g>
+      </svg>
+    <svg id="partitionF" width=1000 height=1000 transform="rotate(-90), translate(-500,0)">
+      <g transform="rotate(-90), translate(-220,10)">
+        <g class="rects"></g>
+        <g class="links"></g>
+        <g class="nodes"></g>
+      </g>
+    </svg>
+
+      <svg id="radialDist" width=4000 height=2000>
+        <g transform="translate(600,600)">
+          <g class="rects"></g>
+          <g class="links"></g>
+          <g class="nodes"></g>
+        </g>
+      </svg>
+
+      <svg id="treemapDist" width=1440 height=1000></svg>
+    
+      <svg id="circleDist" width=700 height=700 transform="rotate(-90), translate(-200,0)">
+        <g  transform="translate(5,5)"></g>
+      </svg>
+    <svg id="partitionDist" width=1000 height=1000 transform="rotate(-90), translate(-500,0)">
+      <g transform="rotate(-90), translate(-220,10)">
+        <g class="rects"></g>
+        <g class="links"></g>
+        <g class="nodes"></g>
+      </g>
+    </svg>
+    
+    </div>
+    <script type="module" src="/main.js"></script>
+    <script type="module" src="/src/modulosVD3.js"></script>
+    <script type="module" src="/src/flareD3.js"></script>
+    <script type="module" src="/src/distritosCrD3.js"></script>
+  </body>
+</html>
